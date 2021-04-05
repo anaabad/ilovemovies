@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import java.util.Date;
 import java.util.List;
+
 @Data
 @Entity
 public class ActorEntity extends AbstractEntity{
@@ -15,9 +16,7 @@ public class ActorEntity extends AbstractEntity{
     @Column(nullable = false)
     private Date birth_date;
     @Column(nullable = false)
-    private String nacionality;
+    private String nationality;
     @ManyToMany(mappedBy = "actors")
     private List<MovieEntity> movies;
-
-
 }

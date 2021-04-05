@@ -1,7 +1,7 @@
 package com.github.anaabad.ilovemovies.controllers;
 
 import com.github.anaabad.ilovemovies.persistence.entity.ActorEntity;
-import com.github.anaabad.ilovemovies.persistence.repository.ActorRepository;
+import com.github.anaabad.ilovemovies.services.ActorService;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -13,40 +13,40 @@ import java.util.Optional;
 @RequestMapping("/actors")
 public class ActorsController {
 
-    ActorRepository actorRepository;
+    ActorService actorService;
 
-    public ActorsController(ActorRepository repository){
-        this.actorRepository = repository;
+    public ActorsController(ActorService actorService) {
+        this.actorService = actorService;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public ActorEntity show(@PathVariable Long id){
-        return actorRepository.getById(id);
+    public Optional<ActorEntity> show(@PathVariable Long id) {
+        return actorService.findById(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<ActorEntity> index(){
-        return actorRepository.getAll();
+    public List<ActorEntity> index() {
+        return actorService.getAll();
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ActorEntity create(@RequestBody ActorEntity actor){
-        return actorRepository.save(actor);
+    public ActorEntity create(@RequestBody ActorEntity actor) {
+        return actorService.save(actor);
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.ACCEPTED)
     @PutMapping
     public ActorEntity update(@RequestBody ActorEntity updatedActor, @PathVariable Long id) throws NotFoundException {
-        Optional<ActorEntity> actorOpt = actorRepository.findById(id);
-        if(actorOpt.isPresent()){
+        Optional<ActorEntity> actorOpt = actorService.findById(id);
+        if (actorOpt.isPresent()) {
             ActorEntity actor = actorOpt.get();
             actor.setName(updatedActor.getName());
-            actor.setNacionality((updatedActor.getNacionality()));
+            actor.setNationality((updatedActor.getNationality()));
             actor.setBirth_date(updatedActor.getBirth_date());
-            return actorRepository.save(actor);
+            return actorService.save(actor);
         } else {
             throw new NotFoundException("Actor not found");
         }
@@ -54,8 +54,8 @@ public class ActorsController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping
-    public void delete(@RequestParam(value = "id") Long id){
-        Optional<ActorEntity> actorOpt = actorRepository.findById(id);
-        actorOpt.ifPresent(value -> actorRepository.delete(value));
+    public void delete(@RequestParam(value = "id") Long id) {
+        Optional<ActorEntity> actorOpt = actorService.findById(id);
+        actorOpt.ifPresent(value -> actorService.delete(value));
     }
 }

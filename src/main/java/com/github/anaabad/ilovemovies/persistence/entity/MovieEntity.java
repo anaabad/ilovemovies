@@ -1,9 +1,12 @@
 package com.github.anaabad.ilovemovies.persistence.entity;
 
+import lombok.Data;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
+@Data
 @Entity
 public class MovieEntity extends AbstractEntity {
     @Column(nullable = false, unique = true)
