@@ -19,7 +19,7 @@ public class DirectorsController {
         this.directorService = directorService;
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     Optional<DirectorEntity> show(@PathVariable Long id) {
         return directorService.findById(id);

@@ -24,7 +24,7 @@ public class MoviesController {
         return movieService.getAll();
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Optional<MovieEntity> show(@PathVariable Long id){
         return movieService.getById(id);

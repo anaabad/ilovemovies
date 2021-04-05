@@ -20,7 +20,7 @@ public class ActorsController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping
+    @GetMapping("/{id}")
     public Optional<ActorEntity> show(@PathVariable Long id) {
         return actorService.findById(id);
     }

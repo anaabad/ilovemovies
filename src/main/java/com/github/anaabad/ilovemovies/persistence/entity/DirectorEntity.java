@@ -18,5 +18,5 @@ public class DirectorEntity extends AbstractEntity {
     @Column(nullable = false)
     private Date birth_Date;
     @ManyToMany(mappedBy = "directors")
-    private List<DirectorEntity> directors;
+    private List<MovieEntity> movies;
 }
