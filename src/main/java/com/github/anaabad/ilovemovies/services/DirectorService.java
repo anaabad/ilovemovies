@@ -1,30 +1,39 @@
 package com.github.anaabad.ilovemovies.services;
 
+import com.github.anaabad.ilovemovies.controllers.dtos.DirectorDto;
 import com.github.anaabad.ilovemovies.persistence.entity.DirectorEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.DirectorRepository;
-import org.springframework.stereotype.Component;
+import com.github.anaabad.ilovemovies.services.transformers.DirectorTrf;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class DirectorService {
-    DirectorRepository directorRepository;
+    private final DirectorRepository directorRepository;
+    private final DirectorTrf directorTrf;
 
-    public DirectorService(DirectorRepository directorRepository) {
-        this.directorRepository = directorRepository;
+    public Optional<DirectorDto> findById(Long id) {
+
+        Optional<DirectorEntity> directorOpt = directorRepository.findById(id);
+        return directorOpt.map(entity -> Optional.of(directorTrf.directorEntityToDirectorDto(entity))).orElse(null);
     }
 
-    public Optional<DirectorEntity> findById(Long id) {
-        return directorRepository.findById(id);
+    public List<DirectorDto> getAll() {
+
+        return directorRepository.findAll()
+                .stream()
+                .map(directorEntity -> directorTrf.directorEntityToDirectorDto(directorEntity))
+                .collect(Collectors.toList());
     }
 
-    public List<DirectorEntity> getAll() {
-        return directorRepository.findAll();
-    }
-
-    public DirectorEntity save(DirectorEntity directorEntity) {
-        return directorRepository.save(directorEntity);
+    public DirectorDto save(DirectorDto directorDto) {
+        DirectorEntity directorEntity = directorRepository.save(directorTrf.directorDtoToDirectorEntity(directorDto));
+        return directorTrf.directorEntityToDirectorDto(directorEntity);
     }
 
     public void delete(Long id) {

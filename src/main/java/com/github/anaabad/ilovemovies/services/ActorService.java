@@ -1,34 +1,42 @@
 package com.github.anaabad.ilovemovies.services;
 
+import com.github.anaabad.ilovemovies.controllers.dtos.ActorDto;
 import com.github.anaabad.ilovemovies.persistence.entity.ActorEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.ActorRepository;
-import org.springframework.stereotype.Component;
+import com.github.anaabad.ilovemovies.services.transformers.ActorTrf;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class ActorService {
 
-    ActorRepository actorRepository;
+    private final ActorRepository actorRepository;
 
-    public ActorService(ActorRepository actorRepository) {
-        this.actorRepository = actorRepository;
+    private final ActorTrf actorTrf;
+
+    public Optional<ActorDto> findById(Long id) {
+        Optional<ActorEntity> actorEntity = actorRepository.findById(id);
+        return actorEntity.map(entity -> Optional.of(actorTrf.actorEntityToActorDto(entity))).orElse(null);
     }
 
-    public Optional<ActorEntity> findById(Long id) {
-        return actorRepository.findById(id);
+    public List<ActorDto> getAll() {
+        return actorRepository.findAll()
+                .stream()
+                .map(actorTrf::actorEntityToActorDto)
+                .collect(Collectors.toList());
     }
 
-    public List<ActorEntity> getAll() {
-        return actorRepository.findAll();
+    public ActorDto save(ActorDto actorDto) {
+        ActorEntity actorEntity = actorTrf.actorDtoToActorEntity(actorDto);
+        return actorTrf.actorEntityToActorDto(actorRepository.save(actorEntity));
     }
 
-    public ActorEntity save(ActorEntity actorEntity) {
-        return actorRepository.save(actorEntity);
-    }
-
-    public void delete(ActorEntity actorEntity) {
-        actorRepository.delete(actorEntity);
+    public void delete(ActorDto actorDto) {
+        actorRepository.delete(actorTrf.actorDtoToActorEntity(actorDto));
     }
 }

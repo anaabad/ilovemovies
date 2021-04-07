@@ -1,33 +1,41 @@
 package com.github.anaabad.ilovemovies.services;
 
+import com.github.anaabad.ilovemovies.controllers.dtos.MovieDto;
 import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
-import org.springframework.stereotype.Component;
+import com.github.anaabad.ilovemovies.services.transformers.MovieTrf;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class MovieService {
     MovieRepository movieRepository;
+    MovieTrf movieTrf;
 
-    public MovieService(MovieRepository movieRepository) {
-        this.movieRepository = movieRepository;
+    public List<MovieDto> getAll() {
+
+        return movieRepository.findAll()
+                .stream()
+                .map(movieEntity -> movieTrf.movieEntityToMovieDto(movieEntity))
+                .collect(Collectors.toList());
     }
 
-    public List<MovieEntity> getAll(){
-        return movieRepository.findAll();
+    public Optional<MovieDto> getById(Long id) {
+        Optional<MovieEntity> movieOpt = movieRepository.findById(id);
+        return Optional.of(movieOpt.map(movie -> movieTrf.movieEntityToMovieDto(movie))).orElse(null);
     }
 
-    public Optional<MovieEntity> getById(Long id){
-        return movieRepository.findById(id);
+    public MovieDto save(MovieDto movieDto) {
+        MovieEntity movie = movieTrf.movieDtoToMovieEntity(movieDto);
+        return movieTrf.movieEntityToMovieDto(movieRepository.save(movie));
     }
 
-    public MovieEntity save(MovieEntity movieEntity){
-        return movieRepository.save(movieEntity);
-    }
-
-    public void delete(MovieEntity movieEntity){
-        movieRepository.delete(movieEntity);
+    public void delete(MovieDto movieDto) {
+        movieRepository.delete(movieTrf.movieDtoToMovieEntity(movieDto));
     }
 }

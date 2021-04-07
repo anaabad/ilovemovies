@@ -1,6 +1,6 @@
 package com.github.anaabad.ilovemovies.controllers;
 
-import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
+import com.github.anaabad.ilovemovies.controllers.dtos.MovieDto;
 import com.github.anaabad.ilovemovies.services.MovieService;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
@@ -20,35 +20,35 @@ public class MoviesController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<MovieEntity> index() {
+    public List<MovieDto> index() {
         return movieService.getAll();
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<MovieEntity> show(@PathVariable Long id){
+    public Optional<MovieDto> show(@PathVariable Long id){
         return movieService.getById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MovieEntity create(@RequestBody MovieEntity movieEntity){
-        return movieService.save(movieEntity);
+    public MovieDto create(@RequestBody MovieDto movieDto){
+        return movieService.save(movieDto);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public MovieEntity update(@PathVariable Long id, @RequestBody MovieEntity movieEntity) throws NotFoundException{
-        Optional<MovieEntity> movieEntityOpt = movieService.getById(id);
+    public MovieDto update(@PathVariable Long id, @RequestBody MovieDto movieDto) throws NotFoundException{
+        Optional<MovieDto> movieDtoOpt = movieService.getById(id);
 
-        if(movieEntityOpt.isPresent()){
-            MovieEntity movie = movieEntityOpt.get();
-            movie.setName(movieEntity.getName());
-            movie.setDuration(movieEntity.getDuration());
-            movie.setGenre(movieEntity.getGenre());
-            movie.setReleaseDate(movieEntity.getReleaseDate());
-            movie.setActors(movieEntity.getActors());
-            movie.setDirectors(movieEntity.getDirectors());
+        if(movieDtoOpt.isPresent()){
+            MovieDto movie = movieDtoOpt.get();
+            movie.setName(movieDto.getName());
+            movie.setDuration(movieDto.getDuration());
+            movie.setGenre(movieDto.getGenre());
+            movie.setReleaseDate(movieDto.getReleaseDate());
+            movie.setActors(movieDto.getActors());
+            movie.setDirectors(movieDto.getDirectors());
             return movieService.save(movie);
         }else{
             throw new NotFoundException("Movie not Found");
@@ -58,7 +58,7 @@ public class MoviesController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id){
-        Optional<MovieEntity> movie = movieService.getById(id);
+        Optional<MovieDto> movie = movieService.getById(id);
         movie.ifPresent(value -> movieService.delete(value));
     }
 }
