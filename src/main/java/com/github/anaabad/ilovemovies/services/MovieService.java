@@ -4,8 +4,11 @@ import com.github.anaabad.ilovemovies.controllers.dtos.MovieDto;
 import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
 import com.github.anaabad.ilovemovies.services.transformers.MovieTrf;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,8 +17,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MovieService {
-    MovieRepository movieRepository;
-    MovieTrf movieTrf;
+    private final MovieRepository movieRepository;
+    private final MovieTrf movieTrf;
 
     public List<MovieDto> getAll() {
 
@@ -25,9 +28,9 @@ public class MovieService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<MovieDto> getById(Long id) {
-        Optional<MovieEntity> movieOpt = movieRepository.findById(id);
-        return Optional.of(movieOpt.map(movie -> movieTrf.movieEntityToMovieDto(movie))).orElse(null);
+    public MovieDto getById(Long id) throws NotFoundException {
+        Optional<MovieEntity> movie = movieRepository.findById(id);
+        return movie.map(movieTrf::movieEntityToMovieDto).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie not found"));
     }
 
     public MovieDto save(MovieDto movieDto) {

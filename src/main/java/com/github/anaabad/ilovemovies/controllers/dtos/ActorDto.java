@@ -1,16 +1,19 @@
 package com.github.anaabad.ilovemovies.controllers.dtos;
 
-import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class ActorDto {
 
     private String name;
-    private Date birthDate;
+    private LocalDate birthDate;
     private String nationality;
-    private List<MovieEntity> movies;
+    private List<MovieDto> movies;
 }

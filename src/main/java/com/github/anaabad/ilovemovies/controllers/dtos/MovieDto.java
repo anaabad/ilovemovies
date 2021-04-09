@@ -4,6 +4,7 @@ import com.github.anaabad.ilovemovies.persistence.entity.ActorEntity;
 import com.github.anaabad.ilovemovies.persistence.entity.DirectorEntity;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -11,9 +12,9 @@ import java.util.List;
 public class MovieDto {
 
     private String name;
-    private Date releaseDate;
+    private LocalDate releaseDate;
     private String genre;
     private Integer duration;
-    private List<DirectorEntity> directors;
-    private List<ActorEntity> actors;
+    private List<DirectorDto> directors;
+    private List<ActorDto> actors;
 }
