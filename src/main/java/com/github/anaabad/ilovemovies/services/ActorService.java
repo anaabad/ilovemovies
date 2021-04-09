@@ -5,11 +5,16 @@ import com.github.anaabad.ilovemovies.persistence.entity.ActorEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.ActorRepository;
 import com.github.anaabad.ilovemovies.services.transformers.ActorTrf;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
@@ -19,9 +24,11 @@ public class ActorService {
 
     private final ActorTrf actorTrf;
 
-    public Optional<ActorDto> findById(Long id) {
+    public ActorDto findById(Long id) {
         Optional<ActorEntity> actorEntity = actorRepository.findById(id);
-        return actorEntity.map(entity -> Optional.of(actorTrf.actorEntityToActorDto(entity))).orElse(null);
+        return actorEntity
+                .map(actorTrf::actorEntityToActorDto)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, format("Actor with ID %s was not found", id)));
     }
 
     public List<ActorDto> getAll() {

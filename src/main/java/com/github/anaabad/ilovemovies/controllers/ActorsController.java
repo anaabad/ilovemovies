@@ -1,7 +1,6 @@
 package com.github.anaabad.ilovemovies.controllers;
 
 import com.github.anaabad.ilovemovies.controllers.dtos.ActorDto;
-import com.github.anaabad.ilovemovies.persistence.entity.ActorEntity;
 import com.github.anaabad.ilovemovies.services.ActorService;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,7 +18,7 @@ public class ActorsController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public Optional<ActorDto> show(@PathVariable Long id) {
+    public ActorDto show(@PathVariable Long id) {
         return actorService.findById(id);
     }
 
@@ -39,22 +37,18 @@ public class ActorsController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PutMapping
     public ActorDto update(@RequestBody ActorDto updatedActor, @PathVariable Long id) throws NotFoundException {
-        Optional<ActorDto> actorOpt = actorService.findById(id);
-        if (actorOpt.isPresent()) {
-            ActorDto actor = actorOpt.get();
-            actor.setName(updatedActor.getName());
-            actor.setNationality((updatedActor.getNationality()));
-            actor.setBirthDate(updatedActor.getBirthDate());
-            return actorService.save(actor);
-        } else {
-            throw new NotFoundException("Actor not found");
-        }
+        ActorDto actor = actorService.findById(id);
+        actor.setName(updatedActor.getName());
+        actor.setNationality((updatedActor.getNationality()));
+        actor.setBirthDate(updatedActor.getBirthDate());
+        return actorService.save(actor);
+
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping
-    public void delete(@RequestParam(value = "id") Long id) {
-        Optional<ActorDto> actorOpt = actorService.findById(id);
-        actorOpt.ifPresent(value -> actorService.delete(value));
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        ActorDto actor = actorService.findById(id);
+        actorService.delete(actor);
     }
 }

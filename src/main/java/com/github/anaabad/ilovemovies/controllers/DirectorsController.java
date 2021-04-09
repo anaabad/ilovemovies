@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,7 +18,7 @@ public class DirectorsController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    Optional<DirectorDto> show(@PathVariable Long id) {
+    DirectorDto show(@PathVariable Long id) {
         return directorService.findById(id);
     }
 
@@ -29,30 +28,27 @@ public class DirectorsController {
         return directorService.getAll();
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     DirectorDto update(@PathVariable Long id, @RequestBody DirectorDto directorDto) throws NotFoundException {
-        Optional<DirectorDto> directorDtoOpt = directorService.findById(id);
-        if (directorDtoOpt.isPresent()) {
-            DirectorDto director = directorDtoOpt.get();
-            director.setName(directorDto.getName());
-            director.setBirthDate(directorDto.getBirthDate());
-            director.setNationality(directorDto.getNationality());
-            return directorService.save(director);
-        } else {
-            throw new NotFoundException("Director not found");
-        }
+
+        DirectorDto director = directorService.findById(id);
+        director.setName(directorDto.getName());
+        director.setBirthDate(directorDto.getBirthDate());
+        director.setNationality(directorDto.getNationality());
+        return directorService.save(director);
+
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    DirectorDto create(DirectorDto directorDto) {
+    DirectorDto create(@RequestBody DirectorDto directorDto) {
         return directorService.save(directorDto);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void delete(Long id) {
+    void delete(@PathVariable Long id) {
         directorService.delete(id);
     }
 
