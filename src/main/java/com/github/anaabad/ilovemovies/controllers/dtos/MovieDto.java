@@ -14,6 +14,6 @@ public class MovieDto {
     private Date releaseDate;
     private String genre;
     private Integer duration;
-    private List<DirectorEntity> directors;
-    private List<ActorEntity> actors;
+    private List<DirectorDto> directors;
+    private List<ActorDto> actors;
 }

@@ -12,5 +12,5 @@ public class ActorDto {
     private String name;
     private Date birthDate;
     private String nationality;
-    private List<MovieEntity> movies;
+    private List<MovieDto> movies;
 }
