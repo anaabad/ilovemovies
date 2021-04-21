@@ -26,7 +26,7 @@ public class MoviesController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<MovieDto> show(@PathVariable Long id){
+    public MovieDto show(@PathVariable Long id) throws NotFoundException {
         return movieService.getById(id);
     }
 
@@ -36,29 +36,18 @@ public class MoviesController {
         return movieService.save(movieDto);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MovieDto update(@PathVariable Long id, @RequestBody MovieDto movieDto) throws NotFoundException{
-        Optional<MovieDto> movieDtoOpt = movieService.getById(id);
 
-        if(movieDtoOpt.isPresent()){
-            MovieDto movie = movieDtoOpt.get();
-            movie.setName(movieDto.getName());
-            movie.setDuration(movieDto.getDuration());
-            movie.setGenre(movieDto.getGenre());
-            movie.setReleaseDate(movieDto.getReleaseDate());
-            movie.setActors(movieDto.getActors());
-            movie.setDirectors(movieDto.getDirectors());
-            return movieService.save(movie);
-        }else{
-            throw new NotFoundException("Movie not Found");
-        }
+        return movieService.update(id, movieDto);
+
     }
 
-    @DeleteMapping
+    @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id){
-        Optional<MovieDto> movie = movieService.getById(id);
-        movie.ifPresent(value -> movieService.delete(value));
+    public void delete(@PathVariable Long id) throws NotFoundException {
+        MovieDto movie = movieService.getById(id);
+        movieService.delete(movie);
     }
 }
