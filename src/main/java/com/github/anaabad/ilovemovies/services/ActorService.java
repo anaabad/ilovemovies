@@ -43,6 +43,17 @@ public class ActorService {
         return actorTrf.actorEntityToActorDto(actorRepository.save(actorEntity));
     }
 
+    public ActorDto update(Long id, ActorDto actorDto){
+
+        ActorDto actor = findById(id);
+        actor.setName(actorDto.getName());
+        actor.setNationality(actorDto.getNationality());
+        actor.setBirthDate(actorDto.getBirthDate());
+        actor.setMovies(actorDto.getMovies());
+
+        return save(actor);
+    }
+
     public void delete(ActorDto actorDto) {
         actorRepository.delete(actorTrf.actorDtoToActorEntity(actorDto));
     }

@@ -44,4 +44,12 @@ public class DirectorService {
     public void delete(Long id) {
         directorRepository.deleteById(id);
     }
+
+    public DirectorDto update(Long id, DirectorDto directorDto){
+        DirectorDto director = findById(id);
+        director.setName(directorDto.getName());
+        director.setBirthDate(directorDto.getBirthDate());
+        director.setNationality(directorDto.getNationality());
+        return save(director);
+    }
 }

@@ -32,11 +32,7 @@ public class DirectorsController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     DirectorDto update(@PathVariable Long id, @RequestBody DirectorDto directorDto) throws NotFoundException {
 
-        DirectorDto director = directorService.findById(id);
-        director.setName(directorDto.getName());
-        director.setBirthDate(directorDto.getBirthDate());
-        director.setNationality(directorDto.getNationality());
-        return directorService.save(director);
+        return directorService.update(id, directorDto);
 
     }
 

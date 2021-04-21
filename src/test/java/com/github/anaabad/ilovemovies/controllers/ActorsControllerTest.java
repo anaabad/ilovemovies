@@ -4,6 +4,7 @@ import com.github.anaabad.ilovemovies.persistence.entity.ActorEntity;
 import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.ActorRepository;
 import com.github.anaabad.ilovemovies.persistence.repository.DirectorRepository;
+import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
 import com.github.anaabad.ilovemovies.services.DirectorService;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,6 +40,9 @@ public class ActorsControllerTest {
 
     @MockBean
     private DirectorRepository mockDirectorRepository;
+
+    @MockBean
+    private MovieRepository mockMovieRepository;
 
     @Test
     public void getActor() throws Exception {

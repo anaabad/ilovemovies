@@ -1,5 +1,6 @@
 package com.github.anaabad.ilovemovies.services;
 
+import com.github.anaabad.ilovemovies.controllers.dtos.ActorDto;
 import com.github.anaabad.ilovemovies.controllers.dtos.MovieDto;
 import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
@@ -40,5 +41,14 @@ public class MovieService {
 
     public void delete(MovieDto movieDto) {
         movieRepository.delete(movieTrf.movieDtoToMovieEntity(movieDto));
+    }
+
+    public MovieDto update(Long id, MovieDto movie) throws NotFoundException {
+        MovieDto movieDto = getById(id);
+        movieDto.setName(movie.getName());
+        movieDto.setDuration(movie.getDuration());
+        movieDto.setGenre(movie.getGenre());
+        movieDto.setReleaseDate(movie.getReleaseDate());
+        return save(movieDto);
     }
 }

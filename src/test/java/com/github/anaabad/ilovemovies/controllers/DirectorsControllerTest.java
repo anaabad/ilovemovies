@@ -3,6 +3,7 @@ package com.github.anaabad.ilovemovies.controllers;
 import com.github.anaabad.ilovemovies.persistence.entity.DirectorEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.ActorRepository;
 import com.github.anaabad.ilovemovies.persistence.repository.DirectorRepository;
+import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
 import com.github.anaabad.ilovemovies.services.ActorService;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ public class DirectorsControllerTest {
 
     @MockBean
     private ActorRepository actorRepository;
+
+    @MockBean
+    private MovieRepository movieRepository;
 
     @Test
     public void getDirector() throws Exception {

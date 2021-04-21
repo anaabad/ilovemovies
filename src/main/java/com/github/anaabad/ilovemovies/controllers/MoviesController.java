@@ -39,15 +39,8 @@ public class MoviesController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MovieDto update(@PathVariable Long id, @RequestBody MovieDto movieDto) throws NotFoundException{
-        MovieDto movie = movieService.getById(id);
 
-        movie.setName(movieDto.getName());
-        movie.setDuration(movieDto.getDuration());
-        movie.setGenre(movieDto.getGenre());
-        movie.setReleaseDate(movieDto.getReleaseDate());
-        movie.setActors(movieDto.getActors());
-        movie.setDirectors(movieDto.getDirectors());
-        return movieService.save(movie);
+        return movieService.update(id, movieDto);
 
     }
 

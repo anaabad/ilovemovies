@@ -37,12 +37,7 @@ public class ActorsController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PutMapping
     public ActorDto update(@RequestBody ActorDto updatedActor, @PathVariable Long id) throws NotFoundException {
-        ActorDto actor = actorService.findById(id);
-        actor.setName(updatedActor.getName());
-        actor.setNationality((updatedActor.getNationality()));
-        actor.setBirthDate(updatedActor.getBirthDate());
-        return actorService.save(actor);
-
+        return actorService.update(id, updatedActor);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
