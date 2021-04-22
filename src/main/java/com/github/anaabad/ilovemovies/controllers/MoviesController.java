@@ -4,6 +4,7 @@ import com.github.anaabad.ilovemovies.controllers.dtos.MovieDto;
 import com.github.anaabad.ilovemovies.services.MovieService;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,12 +31,14 @@ public class MoviesController {
         return movieService.getById(id);
     }
 
+    @Secured("ROLE_ADMIN")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MovieDto create(@RequestBody MovieDto movieDto){
         return movieService.save(movieDto);
     }
 
+    @Secured("ROLE_ADMIN")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MovieDto update(@PathVariable Long id, @RequestBody MovieDto movieDto) throws NotFoundException{
@@ -44,6 +47,7 @@ public class MoviesController {
 
     }
 
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) throws NotFoundException {

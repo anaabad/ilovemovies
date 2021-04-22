@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -79,6 +80,7 @@ public class ActorsControllerTest {
                 .andExpect(jsonPath("$[3].birthDate").value("1967-05-20"));
     }
 
+    @WithMockUser(roles = "ADMIN")
     @Test
     public void createActor() throws Exception {
 
@@ -100,6 +102,30 @@ public class ActorsControllerTest {
                 .andExpect(jsonPath("nationality").value("American"));
     }
 
+    @WithMockUser(roles = "ADMIN")
+    @Test
+    public void updateActor() throws Exception {
+
+        JSONObject content = new JSONObject()
+                .put("name", "Chris Evans")
+                .put("birthDate", "1981-05-13")
+                .put("nationality", "American")
+                .put("movies", new JSONArray());
+
+        ActorEntity actor = new ActorEntity("Chris Evans", LocalDate.parse("1981-05-13"), "American", null);
+
+        when(mockActorRepository.findById(1L)).thenReturn(Optional.of(actor));
+        when(mockActorRepository.save(actor)).thenReturn(actor);
+
+        mockMvc.perform(put("/actors/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content.toString()))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("name").value("Chris Evans"));
+
+    }
+
+    @WithMockUser(roles = "ADMIN")
     @Test
     public void deleteActor() throws Exception {
         ActorEntity actorEntity = new ActorEntity("Chris Evans", LocalDate.parse("1981-05-13"), "American", null);
@@ -107,5 +133,41 @@ public class ActorsControllerTest {
         when(mockActorRepository.findById(1L)).thenReturn(Optional.of(actorEntity));
         mockMvc.perform(delete("/actors/1"))
                 .andExpect(status().isNoContent());
+    }
+
+    @WithMockUser(roles = "USER")
+    @Test
+    public void forbiddenDeletion() throws Exception{
+        mockMvc.perform(delete("/actors/1"))
+        .andExpect(status().isForbidden());
+    }
+
+    @WithMockUser(roles = "USER")
+    @Test
+    public void forbiddenUpdate() throws Exception{
+        JSONObject content = new JSONObject()
+                .put("name", "Chris Evans")
+                .put("birthDate", "1981-05-13")
+                .put("nationality", "American")
+                .put("movies", new JSONArray());
+
+        mockMvc.perform(put("/actors/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content.toString()))
+                .andExpect(status().isForbidden());
+    }
+    @WithMockUser(roles = "USER")
+    @Test
+    public void forbiddenCreation() throws Exception{
+        JSONObject content = new JSONObject()
+                .put("name", "Chris Evans")
+                .put("birthDate", "1981-05-13")
+                .put("nationality", "American")
+                .put("movies", new JSONArray());
+
+        mockMvc.perform(post("/actors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content.toString()))
+                .andExpect(status().isForbidden());
     }
 }
