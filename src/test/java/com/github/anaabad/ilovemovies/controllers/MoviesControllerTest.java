@@ -93,7 +93,7 @@ public class MoviesControllerTest {
                 .put("directors", new JSONArray())
                 .put("actors", new JSONArray());
 
-        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
+        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, emptyList(), Arrays.asList());
         when(movieRepository.save(movieEntity)).thenReturn(movieEntity);
         mockMvc.perform(post("/movies")
                 .contentType(MediaType.APPLICATION_JSON)
