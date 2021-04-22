@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -41,6 +43,7 @@ public class DirectorsControllerTest {
 
     @MockBean
     private MovieRepository movieRepository;
+
 
     @Test
     public void getDirector() throws Exception {
@@ -74,6 +77,7 @@ public class DirectorsControllerTest {
                 .andExpect(jsonPath("$[2].birthDate").value("1954-08-16"));
     }
 
+    @WithMockUser(roles = "ADMIN")
     @Test
     public void updateDirector() throws Exception {
 
@@ -95,6 +99,7 @@ public class DirectorsControllerTest {
 
     }
 
+    @WithMockUser(roles = "ADMIN")
     @Test
     public void postDirector() throws Exception {
 
@@ -114,6 +119,7 @@ public class DirectorsControllerTest {
                 .andExpect(jsonPath("name").value("Guy Ritchie"));
     }
 
+    @WithMockUser(roles = "ADMIN")
     @Test
     public void deleteDirector() throws Exception{
 
@@ -121,5 +127,41 @@ public class DirectorsControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(directorRepository).deleteById(1L);
+    }
+
+    @WithMockUser(roles = "USER")
+    @Test
+    public void forbiddenDeletion() throws Exception {
+        mockMvc.perform(delete("/directors/1"))
+                .andExpect(status().isForbidden());
+    }
+
+    @WithMockUser(roles = "USER")
+    @Test
+    public void forbiddenCreation() throws Exception {
+        JSONObject content = new JSONObject()
+                .put("name", "Guy Ritchie")
+                .put("nationality", "British")
+                .put("birthDate", "1968-09-10");
+
+        mockMvc.perform(post("/directors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content.toString()))
+                .andExpect(status().isForbidden());
+    }
+
+    @WithMockUser(roles = "USER")
+    @Test
+    public void forbiddenUpdate() throws Exception {
+        JSONObject content = new JSONObject()
+                .put("name", "James Cameron")
+                .put("birthDate", "1954-08-16")
+                .put("nationality", "American");
+
+        mockMvc.perform(put("/directors/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content.toString()))
+                .andExpect(status().isForbidden());
+
     }
 }

@@ -5,6 +5,7 @@ import com.github.anaabad.ilovemovies.services.DirectorService;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class DirectorsController {
         return directorService.getAll();
     }
 
+    @Secured("ROLE_ADMIN")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     DirectorDto update(@PathVariable Long id, @RequestBody DirectorDto directorDto) throws NotFoundException {
@@ -36,12 +38,14 @@ public class DirectorsController {
 
     }
 
+    @Secured("ROLE_ADMIN")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     DirectorDto create(@RequestBody DirectorDto directorDto) {
         return directorService.save(directorDto);
     }
 
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void delete(@PathVariable Long id) {

@@ -5,8 +5,10 @@ import com.github.anaabad.ilovemovies.services.ActorService;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.RolesAllowed;
 import java.util.List;
 
 @RestController
@@ -28,18 +30,21 @@ public class ActorsController {
         return actorService.getAll();
     }
 
+    @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public ActorDto create(@RequestBody ActorDto actor) {
         return actorService.save(actor);
     }
 
+    @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @PutMapping
+    @PutMapping("/{id}")
     public ActorDto update(@RequestBody ActorDto updatedActor, @PathVariable Long id) throws NotFoundException {
         return actorService.update(id, updatedActor);
     }
 
+    @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
