@@ -53,7 +53,6 @@ public class ActorService {
         return save(actor);
     }
 
-    @RolesAllowed("ROLE_ADMIN")
     public void delete(ActorDto actorDto) {
         actorRepository.delete(actorTrf.actorDtoToActorEntity(actorDto));
     }

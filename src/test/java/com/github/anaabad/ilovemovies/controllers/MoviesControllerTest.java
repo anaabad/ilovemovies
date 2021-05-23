@@ -46,7 +46,7 @@ public class MoviesControllerTest {
     @Test
     public void getMovie() throws Exception {
 
-        MovieEntity movieEntity = new MovieEntity("Jurassic Park", LocalDate.parse("1993-10-30"), "Sci-Fi", 128, emptyList(), emptyList());
+        MovieEntity movieEntity = new MovieEntity("Jurassic Park", LocalDate.parse("1993-10-30"), "Sci-Fi", 128, emptyList(), emptyList(), emptyList());
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movieEntity));
 
         mockMvc.perform(get("/movies/1"))
@@ -66,10 +66,10 @@ public class MoviesControllerTest {
 
     @Test
     public void getMovies() throws Exception {
-        List<MovieEntity> movies = Arrays.asList(new MovieEntity("Jurassic Park", LocalDate.parse("1993-10-30"), "Sci-Fi", 128, emptyList(), emptyList()),
-                new MovieEntity("Harry Potter and the prisoner of Azkaban", LocalDate.parse("2004-05-18"), "Adventure", 142, emptyList(), emptyList()),
-                new MovieEntity("Crossroads", LocalDate.parse("1986-03-14"), "Musical", 94, emptyList(), emptyList()),
-                new MovieEntity("Ready Player One", LocalDate.parse("2018-03-29"), "Sci-Fi", 139, emptyList(), emptyList()));
+        List<MovieEntity> movies = Arrays.asList(new MovieEntity("Jurassic Park", LocalDate.parse("1993-10-30"), "Sci-Fi", 128, emptyList(), emptyList(), emptyList()),
+                new MovieEntity("Harry Potter and the prisoner of Azkaban", LocalDate.parse("2004-05-18"), "Adventure", 142, emptyList(), emptyList(), emptyList()),
+                new MovieEntity("Crossroads", LocalDate.parse("1986-03-14"), "Musical", 94, emptyList(), emptyList(), emptyList()),
+                new MovieEntity("Ready Player One", LocalDate.parse("2018-03-29"), "Sci-Fi", 139, emptyList(), emptyList(), emptyList()));
 
         when(movieRepository.findAll()).thenReturn(movies);
         mockMvc.perform(get("/movies"))
@@ -93,7 +93,7 @@ public class MoviesControllerTest {
                 .put("directors", new JSONArray())
                 .put("actors", new JSONArray());
 
-        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, emptyList(), Arrays.asList());
+        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList(), emptyList());
         when(movieRepository.save(movieEntity)).thenReturn(movieEntity);
         mockMvc.perform(post("/movies")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -114,8 +114,8 @@ public class MoviesControllerTest {
                 .put("actors", new JSONArray())
                 .put("directors", new JSONArray());
 
-        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
-        MovieEntity updatedMovieEntity = new MovieEntity("Tangled", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
+        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList(), emptyList());
+        MovieEntity updatedMovieEntity = new MovieEntity("Tangled", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList(), emptyList());
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movieEntity));
         when(movieRepository.save(updatedMovieEntity)).thenReturn(updatedMovieEntity);
         mockMvc.perform(put("/movies/1")
@@ -128,7 +128,7 @@ public class MoviesControllerTest {
     @WithMockUser(roles = "ADMIN")
     @Test
     public void deleteMovie() throws Exception {
-        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
+        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList(), emptyList());
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movieEntity));
         mockMvc.perform(delete("/movies/1"))
                 .andExpect(status().isNoContent());

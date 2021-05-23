@@ -1,6 +1,8 @@
 package com.github.anaabad.ilovemovies.controllers;
 
+import com.github.anaabad.ilovemovies.controllers.dtos.CommentDto;
 import com.github.anaabad.ilovemovies.controllers.dtos.MovieDto;
+import com.github.anaabad.ilovemovies.services.CommentService;
 import com.github.anaabad.ilovemovies.services.MovieService;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import java.util.Optional;
 @RequestMapping("/movies")
 public class MoviesController {
     MovieService movieService;
+    CommentService commentService;
 
     public MoviesController(MovieService movieService) {
         this.movieService = movieService;
@@ -53,5 +56,18 @@ public class MoviesController {
     public void delete(@PathVariable Long id) throws NotFoundException {
         MovieDto movie = movieService.getById(id);
         movieService.delete(movie);
+    }
+
+    @PostMapping("{id}/add_comment")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto add_comment(@PathVariable Long id, @RequestBody CommentDto commentDto) throws NotFoundException {
+        commentDto.setMovie(movieService.getById(id));
+        return commentService.save(commentDto);
+    }
+
+    @GetMapping("{id}/comments")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<CommentDto> get_comments(@PathVariable Long id){
+        return commentService.getAllByMovieId(id);
     }
 }

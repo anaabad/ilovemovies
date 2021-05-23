@@ -33,4 +33,7 @@ public class MovieEntity extends AbstractEntity {
             joinColumns = @JoinColumn(name = "actor_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "movie_id", referencedColumnName = "id"))
     private List<ActorEntity> actors;
+
+    @OneToMany(mappedBy = "movie")
+    List<CommentEntity> comments;
 }
