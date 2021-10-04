@@ -15,9 +15,9 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping(value="/login")
+    @PostMapping(value = "/login")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public String login (@RequestBody UserDto userDto){
+    public String login(@RequestBody UserDto userDto) {
         return authenticationService.authenticateUser(userDto.email, userDto.password);
     }
 

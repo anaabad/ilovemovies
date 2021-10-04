@@ -1,9 +1,11 @@
 package com.github.anaabad.ilovemovies.controllers;
 
 import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
-import com.github.anaabad.ilovemovies.persistence.repository.ActorRepository;
-import com.github.anaabad.ilovemovies.persistence.repository.DirectorRepository;
-import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
+import com.github.anaabad.ilovemovies.persistence.entity.RoleEntity;
+import com.github.anaabad.ilovemovies.persistence.entity.UserEntity;
+import com.github.anaabad.ilovemovies.persistence.repository.*;
+import com.github.anaabad.ilovemovies.security.JwtAuthenticationEntryPoint;
+import com.github.anaabad.ilovemovies.services.AuthenticationService;
 import com.github.anaabad.ilovemovies.services.MovieService;
 import net.minidev.json.JSONArray;
 import org.json.JSONObject;
@@ -29,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
-@ComponentScan(basePackageClasses = {MovieService.class})
+@ComponentScan(basePackageClasses = {MovieService.class, AuthenticationService.class, JwtAuthenticationEntryPoint.class})
 public class MoviesControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -43,13 +45,23 @@ public class MoviesControllerTest {
     @MockBean
     private DirectorRepository directorRepository;
 
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private RoleRepository roleRepository;
+
+    private final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmEuYWJhZGFycmFuekBnbWFpbC5jb20iLCJleHAiOjE5MTcwMzMzNDYsImlhdCI6MTUxNjIzOTAyMn0.W-VORCCxDUHT4_rLVGfu95rczq3k5g8nPabB-sFklhc";
+
     @Test
     public void getMovie() throws Exception {
 
         MovieEntity movieEntity = new MovieEntity("Jurassic Park", LocalDate.parse("1993-10-30"), "Sci-Fi", 128, emptyList(), emptyList());
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movieEntity));
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
-        mockMvc.perform(get("/movies/1"))
+        mockMvc.perform(get("/movies/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect((jsonPath("name").value("Jurassic Park")))
                 .andExpect(jsonPath("releaseDate").value("1993-10-30"))
@@ -60,7 +72,10 @@ public class MoviesControllerTest {
 
     @Test
     public void getNonExistingMovie() throws Exception {
-        mockMvc.perform(get("/movies/1"))
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
+        mockMvc.perform(get("/movies/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isNotFound());
     }
 
@@ -72,7 +87,10 @@ public class MoviesControllerTest {
                 new MovieEntity("Ready Player One", LocalDate.parse("2018-03-29"), "Sci-Fi", 139, emptyList(), emptyList()));
 
         when(movieRepository.findAll()).thenReturn(movies);
-        mockMvc.perform(get("/movies"))
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
+        mockMvc.perform(get("/movies")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*]", hasSize(4)))
                 .andExpect(jsonPath("$[0].name").value("Jurassic Park"))
@@ -81,7 +99,6 @@ public class MoviesControllerTest {
                 .andExpect(jsonPath("$[3].duration").value(139));
     }
 
-    @WithMockUser(roles = "ADMIN")
     @Test
     public void createMovie() throws Exception {
 
@@ -94,15 +111,19 @@ public class MoviesControllerTest {
                 .put("actors", new JSONArray());
 
         MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
+        RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
+
         when(movieRepository.save(movieEntity)).thenReturn(movieEntity);
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList(roleEntity))));
+
         mockMvc.perform(post("/movies")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("name").value("Enredados"));
     }
 
-    @WithMockUser(roles = "ADMIN")
     @Test
     public void updateMovie() throws Exception {
 
@@ -116,32 +137,46 @@ public class MoviesControllerTest {
 
         MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
         MovieEntity updatedMovieEntity = new MovieEntity("Tangled", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
+        RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
+
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movieEntity));
         when(movieRepository.save(updatedMovieEntity)).thenReturn(updatedMovieEntity);
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList(roleEntity))));
+
         mockMvc.perform(put("/movies/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(movie.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(movie.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("name").value("Tangled"));
     }
 
-    @WithMockUser(roles = "ADMIN")
+
     @Test
     public void deleteMovie() throws Exception {
         MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
+
+        RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
+
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movieEntity));
-        mockMvc.perform(delete("/movies/1"))
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList(roleEntity))));
+
+        mockMvc.perform(delete("/movies/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isNoContent());
     }
 
-    @WithMockUser(roles = "USER")
+
     @Test
     public void forbiddenDeletion() throws Exception {
-        mockMvc.perform(delete("/movies/1"))
-        .andExpect(status().isForbidden());
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
+        mockMvc.perform(delete("/movies/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isForbidden());
     }
 
-    @WithMockUser(roles = "USER")
+
     @Test
     public void forbiddenCreation() throws Exception {
         JSONObject content = new JSONObject()
@@ -151,13 +186,15 @@ public class MoviesControllerTest {
                 .put("duration", "100")
                 .put("directors", new JSONArray())
                 .put("actors", new JSONArray());
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
         mockMvc.perform(post("/movies")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isForbidden());
     }
-    @WithMockUser(roles = "USER")
+
     @Test
     public void forbiddenUpdate() throws Exception {
         JSONObject movie = new JSONObject()
@@ -167,10 +204,12 @@ public class MoviesControllerTest {
                 .put("duration", "100")
                 .put("actors", new JSONArray())
                 .put("directors", new JSONArray());
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
         mockMvc.perform(put("/movies/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(movie.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(movie.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isForbidden());
     }
 }

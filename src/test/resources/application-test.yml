@@ -1,0 +1,15 @@
+db:
+  host: localhost
+  port: 5433
+  user: postgres
+  password: Aria1234
+jwt:
+  secret: test
+spring:
+  datasource:
+    url: jdbc:postgresql://${configuration.db.host}:${configuration.db.port}/ilovemovies
+    username: ${configuration.db.user}
+    password: ${configuration.db.password}
+    driver-class-name: "org.postgresql.Driver"
+  jpa:
+    database: postgresql

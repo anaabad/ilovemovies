@@ -1,5 +1,6 @@
 package com.github.anaabad.ilovemovies.services;
 
+import com.github.anaabad.ilovemovies.persistence.entity.RoleEntity;
 import com.github.anaabad.ilovemovies.persistence.entity.UserEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -28,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public static Collection<? extends GrantedAuthority> getAuthorities(UserEntity user) {
-        String[] userRoles = user.getRoles().stream().map((role) -> role.getName()).toArray(String[]::new);
+        String[] userRoles = user.getRoles().stream().map(RoleEntity::getName).toArray(String[]::new);
         Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(userRoles);
         return authorities;
     }

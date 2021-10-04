@@ -1,17 +1,18 @@
 package com.github.anaabad.ilovemovies.controllers;
 
 import com.github.anaabad.ilovemovies.persistence.entity.DirectorEntity;
-import com.github.anaabad.ilovemovies.persistence.repository.ActorRepository;
-import com.github.anaabad.ilovemovies.persistence.repository.DirectorRepository;
-import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
+import com.github.anaabad.ilovemovies.persistence.entity.RoleEntity;
+import com.github.anaabad.ilovemovies.persistence.entity.UserEntity;
+import com.github.anaabad.ilovemovies.persistence.repository.*;
+import com.github.anaabad.ilovemovies.security.JwtAuthenticationEntryPoint;
 import com.github.anaabad.ilovemovies.services.ActorService;
+import com.github.anaabad.ilovemovies.services.AuthenticationService;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
-@ComponentScan(basePackageClasses = {ActorService.class})
+@ComponentScan(basePackageClasses = {ActorService.class, AuthenticationService.class, JwtAuthenticationEntryPoint.class})
 public class DirectorsControllerTest {
 
     @Autowired
@@ -44,19 +45,32 @@ public class DirectorsControllerTest {
     @MockBean
     private MovieRepository movieRepository;
 
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private RoleRepository roleRepository;
+
+    private final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmEuYWJhZGFycmFuekBnbWFpbC5jb20iLCJleHAiOjE5MTcwMzMzNDYsImlhdCI6MTUxNjIzOTAyMn0.W-VORCCxDUHT4_rLVGfu95rczq3k5g8nPabB-sFklhc";
 
     @Test
     public void getDirector() throws Exception {
         DirectorEntity directorEntity = new DirectorEntity("Steven Spielberg", "American", LocalDate.parse("1946-12-18"), null);
         when(directorRepository.findById(1L)).thenReturn(Optional.of(directorEntity));
-        mockMvc.perform(get("/directors/1"))
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
+        mockMvc.perform(get("/directors/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Steven Spielberg"));
     }
 
     @Test
     public void getNonExistingDirector() throws Exception {
-        mockMvc.perform(get("/directors/1"))
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
+        mockMvc.perform(get("/directors/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isNotFound());
     }
 
@@ -68,8 +82,10 @@ public class DirectorsControllerTest {
                 new DirectorEntity("Quentin Tarantino", "American", LocalDate.parse("1963-03-27"), null));
 
         when(directorRepository.findAll()).thenReturn(directors);
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
-        mockMvc.perform(get("/directors"))
+        mockMvc.perform(get("/directors")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*]", hasSize(4)))
                 .andExpect(jsonPath("$[0].name").value("Steven Spielberg"))
@@ -77,7 +93,6 @@ public class DirectorsControllerTest {
                 .andExpect(jsonPath("$[2].birthDate").value("1954-08-16"));
     }
 
-    @WithMockUser(roles = "ADMIN")
     @Test
     public void updateDirector() throws Exception {
 
@@ -88,18 +103,21 @@ public class DirectorsControllerTest {
 
         DirectorEntity directorEntity = new DirectorEntity("James Cameron", "American", LocalDate.parse("1954-08-16"), null);
 
+        RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
+
         when(directorRepository.findById(1L)).thenReturn(Optional.of(directorEntity));
         when(directorRepository.save(directorEntity)).thenReturn(directorEntity);
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList(roleEntity))));
 
         mockMvc.perform(put("/directors/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("name").value("James Cameron"));
 
     }
 
-    @WithMockUser(roles = "ADMIN")
     @Test
     public void postDirector() throws Exception {
 
@@ -110,33 +128,41 @@ public class DirectorsControllerTest {
 
         DirectorEntity directorEntity = new DirectorEntity("Guy Ritchie", "British", LocalDate.parse("1968-09-10"), null);
 
+        RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
+
         when(directorRepository.save(directorEntity)).thenReturn(directorEntity);
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList(roleEntity))));
 
         mockMvc.perform(post("/directors")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("name").value("Guy Ritchie"));
     }
 
-    @WithMockUser(roles = "ADMIN")
     @Test
-    public void deleteDirector() throws Exception{
+    public void deleteDirector() throws Exception {
+        RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
 
-        mockMvc.perform(delete("/directors/1"))
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList(roleEntity))));
+
+        mockMvc.perform(delete("/directors/1").header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isNoContent());
 
         verify(directorRepository).deleteById(1L);
     }
 
-    @WithMockUser(roles = "USER")
     @Test
     public void forbiddenDeletion() throws Exception {
-        mockMvc.perform(delete("/directors/1"))
+
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
+        mockMvc.perform(delete("/directors/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isForbidden());
     }
 
-    @WithMockUser(roles = "USER")
     @Test
     public void forbiddenCreation() throws Exception {
         JSONObject content = new JSONObject()
@@ -144,13 +170,15 @@ public class DirectorsControllerTest {
                 .put("nationality", "British")
                 .put("birthDate", "1968-09-10");
 
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
         mockMvc.perform(post("/directors")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isForbidden());
     }
 
-    @WithMockUser(roles = "USER")
     @Test
     public void forbiddenUpdate() throws Exception {
         JSONObject content = new JSONObject()
@@ -158,9 +186,12 @@ public class DirectorsControllerTest {
                 .put("birthDate", "1954-08-16")
                 .put("nationality", "American");
 
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
         mockMvc.perform(put("/directors/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isForbidden());
 
     }

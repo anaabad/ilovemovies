@@ -2,10 +2,11 @@ package com.github.anaabad.ilovemovies.controllers;
 
 import com.github.anaabad.ilovemovies.persistence.entity.ActorEntity;
 import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
-import com.github.anaabad.ilovemovies.persistence.repository.ActorRepository;
-import com.github.anaabad.ilovemovies.persistence.repository.DirectorRepository;
-import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
-import com.github.anaabad.ilovemovies.persistence.repository.UserRepository;
+import com.github.anaabad.ilovemovies.persistence.entity.RoleEntity;
+import com.github.anaabad.ilovemovies.persistence.entity.UserEntity;
+import com.github.anaabad.ilovemovies.persistence.repository.*;
+import com.github.anaabad.ilovemovies.security.JwtAuthenticationEntryPoint;
+import com.github.anaabad.ilovemovies.services.AuthenticationService;
 import com.github.anaabad.ilovemovies.services.DirectorService;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,7 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -31,7 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
-@ComponentScan(basePackageClasses = {DirectorService.class})
+@ComponentScan(basePackageClasses = {DirectorService.class, AuthenticationService.class, JwtAuthenticationEntryPoint.class})
+@ActiveProfiles(profiles = "test")
+
 public class ActorsControllerTest {
 
     @Autowired
@@ -47,23 +50,33 @@ public class ActorsControllerTest {
     private MovieRepository mockMovieRepository;
 
     @MockBean
+    private RoleRepository roleRepository;
+
+    @MockBean
     private UserRepository userRepository;
+
+    private final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmEuYWJhZGFycmFuekBnbWFpbC5jb20iLCJleHAiOjE5MTcwMzMzNDYsImlhdCI6MTUxNjIzOTAyMn0.W-VORCCxDUHT4_rLVGfu95rczq3k5g8nPabB-sFklhc";
 
     @Test
     public void getActor() throws Exception {
         ActorEntity actor = new ActorEntity();
         actor.setName("Brad Pitt");
         when(mockActorRepository.findById(1L)).thenReturn(Optional.of(actor));
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
-        mockMvc.perform(get("/actors/1"))
+        mockMvc.perform(get("/actors/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Brad Pitt"));
+
     }
 
     @Test
     public void getNonExistingActor() throws Exception {
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
-        mockMvc.perform(get("/actors/3"))
+        mockMvc.perform(get("/actors/3")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isNotFound());
     }
 
@@ -75,8 +88,10 @@ public class ActorsControllerTest {
                 new ActorEntity("Emma Watson", LocalDate.parse("1990-04-15"), "British", movies),
                 new ActorEntity("Nicole Kidman", LocalDate.parse("1967-05-20"), "Australian", movies));
         when(mockActorRepository.findAll()).thenReturn(actors);
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
-        mockMvc.perform(get("/actors"))
+        mockMvc.perform(get("/actors")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*]", hasSize(4)))
                 .andExpect(jsonPath("$[1].name").value("Harrison Ford"))
@@ -84,7 +99,6 @@ public class ActorsControllerTest {
                 .andExpect(jsonPath("$[3].birthDate").value("1967-05-20"));
     }
 
-    @WithMockUser(roles = "ADMIN")
     @Test
     public void createActor() throws Exception {
 
@@ -95,18 +109,21 @@ public class ActorsControllerTest {
                 .put("nationality", "American")
                 .put("movies", new JSONArray());
 
+        RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
+
         when(mockActorRepository.save(actor)).thenReturn(actor);
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList(roleEntity))));
 
         mockMvc.perform(post("/actors")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("name").value("Chris Evans"))
                 .andExpect(jsonPath("birthDate").value("1981-05-13"))
                 .andExpect(jsonPath("nationality").value("American"));
     }
 
-    @WithMockUser(roles = "ADMIN")
     @Test
     public void updateActor() throws Exception {
 
@@ -118,60 +135,73 @@ public class ActorsControllerTest {
 
         ActorEntity actor = new ActorEntity("Chris Evans", LocalDate.parse("1981-05-13"), "American", null);
 
+        RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
+
         when(mockActorRepository.findById(1L)).thenReturn(Optional.of(actor));
         when(mockActorRepository.save(actor)).thenReturn(actor);
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList(roleEntity))));
 
         mockMvc.perform(put("/actors/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("name").value("Chris Evans"));
 
     }
 
-    @WithMockUser(roles = "ADMIN")
     @Test
     public void deleteActor() throws Exception {
         ActorEntity actorEntity = new ActorEntity("Chris Evans", LocalDate.parse("1981-05-13"), "American", null);
 
+        RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
+
         when(mockActorRepository.findById(1L)).thenReturn(Optional.of(actorEntity));
-        mockMvc.perform(delete("/actors/1"))
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList(roleEntity))));
+
+        mockMvc.perform(delete("/actors/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isNoContent());
     }
 
-    @WithMockUser(roles = "USER")
     @Test
-    public void forbiddenDeletion() throws Exception{
-        mockMvc.perform(delete("/actors/1"))
-        .andExpect(status().isForbidden());
-    }
+    public void forbiddenDeletion() throws Exception {
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
-    @WithMockUser(roles = "USER")
-    @Test
-    public void forbiddenUpdate() throws Exception{
-        JSONObject content = new JSONObject()
-                .put("name", "Chris Evans")
-                .put("birthDate", "1981-05-13")
-                .put("nationality", "American")
-                .put("movies", new JSONArray());
-
-        mockMvc.perform(put("/actors/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+        mockMvc.perform(delete("/actors/1")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isForbidden());
     }
-    @WithMockUser(roles = "USER")
+
     @Test
-    public void forbiddenCreation() throws Exception{
+    public void forbiddenUpdate() throws Exception {
         JSONObject content = new JSONObject()
                 .put("name", "Chris Evans")
                 .put("birthDate", "1981-05-13")
                 .put("nationality", "American")
                 .put("movies", new JSONArray());
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
+        mockMvc.perform(put("/actors/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void forbiddenCreation() throws Exception {
+        JSONObject content = new JSONObject()
+                .put("name", "Chris Evans")
+                .put("birthDate", "1981-05-13")
+                .put("nationality", "American")
+                .put("movies", new JSONArray());
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
         mockMvc.perform(post("/actors")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content.toString())
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isForbidden());
     }
 }

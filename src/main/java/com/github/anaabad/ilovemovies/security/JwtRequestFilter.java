@@ -1,7 +1,6 @@
 package com.github.anaabad.ilovemovies.security;
 
 import com.github.anaabad.ilovemovies.persistence.entity.UserEntity;
-import com.github.anaabad.ilovemovies.persistence.repository.UserRepository;
 import com.github.anaabad.ilovemovies.services.CustomUserDetailsService;
 import com.github.anaabad.ilovemovies.services.JwtService;
 import com.github.anaabad.ilovemovies.services.UserService;
@@ -43,12 +42,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 username = jwtService.getClaimsFromToken(jwtToken).getSubject();
             } catch (IllegalArgumentException e) {
-                System.out.println("Unable to get JWT Token");
+                logger.error("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
-                System.out.println("JWT Token has expired");
+                logger.error("JWT Token has expired");
             }
         } else {
-            logger.warn("JWT Token does not begin with Bearer String");
+            logger.error("JWT Token does not begin with Bearer String");
         }
 
         // Once we get the token validate it.

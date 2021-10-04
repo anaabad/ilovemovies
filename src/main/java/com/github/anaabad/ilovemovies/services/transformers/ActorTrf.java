@@ -6,8 +6,6 @@ import com.github.anaabad.ilovemovies.persistence.entity.ActorEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
-
 @Component
 @RequiredArgsConstructor
 public class ActorTrf {

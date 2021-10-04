@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,7 +42,7 @@ public class ActorService {
         return actorTrf.actorEntityToActorDto(actorRepository.save(actorEntity));
     }
 
-    public ActorDto update(Long id, ActorDto actorDto){
+    public ActorDto update(Long id, ActorDto actorDto) {
 
         ActorDto actor = findById(id);
         actor.setName(actorDto.getName());

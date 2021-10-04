@@ -1,6 +1,5 @@
 package com.github.anaabad.ilovemovies.services;
 
-import com.github.anaabad.ilovemovies.controllers.dtos.ActorDto;
 import com.github.anaabad.ilovemovies.controllers.dtos.MovieDto;
 import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
