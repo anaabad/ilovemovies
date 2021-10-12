@@ -2,6 +2,7 @@ package com.github.anaabad.ilovemovies.persistence.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
@@ -15,6 +16,7 @@ import java.util.List;
 @Table(name = "roles")
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class RoleEntity extends AbstractEntity {
 
     @Column(nullable = false, unique = true)

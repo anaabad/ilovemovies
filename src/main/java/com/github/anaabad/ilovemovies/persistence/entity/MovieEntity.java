@@ -2,6 +2,7 @@ package com.github.anaabad.ilovemovies.persistence.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "movie")
+@EqualsAndHashCode
 public class MovieEntity extends AbstractEntity {
     @Column(nullable = false, unique = true)
     private String name;

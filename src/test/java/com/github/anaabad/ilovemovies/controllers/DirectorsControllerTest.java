@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -31,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest
 @ComponentScan(basePackageClasses = {ActorService.class, AuthenticationService.class, JwtAuthenticationEntryPoint.class})
+@ActiveProfiles(profiles = "test")
 public class DirectorsControllerTest {
 
     @Autowired
@@ -51,7 +53,7 @@ public class DirectorsControllerTest {
     @MockBean
     private RoleRepository roleRepository;
 
-    private final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmEuYWJhZGFycmFuekBnbWFpbC5jb20iLCJleHAiOjE5MTcwMzMzNDYsImlhdCI6MTUxNjIzOTAyMn0.W-VORCCxDUHT4_rLVGfu95rczq3k5g8nPabB-sFklhc";
+    private final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmEuYWJhZGFycmFuekBnbWFpbC5jb20iLCJleHAiOjE5MTcwMzMzNDYsImlhdCI6MTUxNjIzOTAyMn0.2d-wBGhNaKWjIWIm9JYi0MTLlsrDzBmHK5BganFD-yE";
 
     @Test
     public void getDirector() throws Exception {
