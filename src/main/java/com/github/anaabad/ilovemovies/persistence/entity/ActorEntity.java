@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "actor")
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper=false)
 public class ActorEntity extends AbstractEntity {
     @Column(nullable = false, unique = true)
     private String name;

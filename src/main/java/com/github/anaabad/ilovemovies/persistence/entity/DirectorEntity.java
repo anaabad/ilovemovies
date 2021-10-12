@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "director")
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper=false)
 public class DirectorEntity extends AbstractEntity {
     @Column(nullable = false, unique = true)
     private String name;

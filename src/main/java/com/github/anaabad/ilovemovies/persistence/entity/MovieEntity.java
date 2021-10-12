@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "movie")
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper=false)
 public class MovieEntity extends AbstractEntity {
     @Column(nullable = false, unique = true)
     private String name;
