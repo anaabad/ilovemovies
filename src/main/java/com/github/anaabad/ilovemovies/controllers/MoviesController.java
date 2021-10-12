@@ -5,10 +5,10 @@ import com.github.anaabad.ilovemovies.services.MovieService;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/movies")
@@ -31,27 +31,33 @@ public class MoviesController {
         return movieService.getById(id);
     }
 
-    @Secured("ROLE_ADMIN")
+    @GetMapping("/byGenre/{genre}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<MovieDto> byGenre(@PathVariable String genre){
+        return movieService.findByGenre(genre);
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MovieDto create(@RequestBody MovieDto movieDto){
+    public MovieDto create(@RequestBody MovieDto movieDto) {
         return movieService.save(movieDto);
     }
 
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public MovieDto update(@PathVariable Long id, @RequestBody MovieDto movieDto) throws NotFoundException{
+    public MovieDto update(@PathVariable Long id, @RequestBody MovieDto movieDto) throws NotFoundException {
 
         return movieService.update(id, movieDto);
 
     }
 
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) throws NotFoundException {
         MovieDto movie = movieService.getById(id);
         movieService.delete(movie);
     }
+
 }

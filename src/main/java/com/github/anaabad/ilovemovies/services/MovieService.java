@@ -1,6 +1,5 @@
 package com.github.anaabad.ilovemovies.services;
 
-import com.github.anaabad.ilovemovies.controllers.dtos.ActorDto;
 import com.github.anaabad.ilovemovies.controllers.dtos.MovieDto;
 import com.github.anaabad.ilovemovies.persistence.entity.MovieEntity;
 import com.github.anaabad.ilovemovies.persistence.repository.MovieRepository;
@@ -50,5 +49,13 @@ public class MovieService {
         movieDto.setGenre(movie.getGenre());
         movieDto.setReleaseDate(movie.getReleaseDate());
         return save(movieDto);
+    }
+
+    public List<MovieDto> findByGenre(String genre){
+        return movieRepository.findByGenre(genre).stream().map(movieTrf::movieEntityToMovieDto).collect(Collectors.toList());
+    }
+
+    public List<MovieDto> findByActor(Long actorId){
+        return movieRepository.findByActor(actorId).stream().map(movieTrf::movieEntityToMovieDto).collect(Collectors.toList());
     }
 }

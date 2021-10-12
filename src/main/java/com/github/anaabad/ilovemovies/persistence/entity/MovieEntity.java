@@ -2,17 +2,19 @@ package com.github.anaabad.ilovemovies.persistence.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "movie")
+@EqualsAndHashCode(callSuper=false)
 public class MovieEntity extends AbstractEntity {
     @Column(nullable = false, unique = true)
     private String name;
