@@ -1,10 +1,11 @@
-db:
-  host: localhost
-  port: 5433
-  user: postgres
-  password: Aria1234
-jwt:
-  secret: test
+configuration:
+  db:
+    host: localhost
+    port: 5432
+    user: ilovemovies
+    password: ilovemovies
+  jwt:
+    secret: test
 spring:
   datasource:
     url: jdbc:postgresql://${configuration.db.host}:${configuration.db.port}/ilovemovies

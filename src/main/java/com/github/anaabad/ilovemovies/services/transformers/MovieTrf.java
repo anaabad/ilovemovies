@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class MovieTrf {
-    public final ActorTrf actorTrf;
-    public final DirectorTrf directorTrf;
 
     public MovieEntity movieDtoToMovieEntity(@NotNull MovieDto movieDto) {
         MovieEntity movieEntity = new MovieEntity();
@@ -20,19 +18,7 @@ public class MovieTrf {
         movieEntity.setDuration(movieDto.getDuration());
         movieEntity.setGenre(movieDto.getGenre());
         movieEntity.setReleaseDate(movieDto.getReleaseDate());
-        if (movieDto.getActors() != null) {
-            movieEntity.setActors(
-                    movieDto.getActors().stream()
-                            .map(actorTrf::actorDtoToActorEntity)
-                            .collect(Collectors.toList()));
-        }
-        if (movieDto.getDirectors() != null) {
-            movieEntity.setDirectors(
-                    movieDto.getDirectors().stream()
-                            .map(directorTrf::directorDtoToDirectorEntity)
-                            .collect(Collectors.toList())
-            );
-        }
+
         return movieEntity;
     }
 
@@ -42,20 +28,7 @@ public class MovieTrf {
         movieDto.setDuration(movieEntity.getDuration());
         movieDto.setGenre(movieEntity.getGenre());
         movieDto.setReleaseDate(movieEntity.getReleaseDate());
-        if (movieEntity.getDirectors() != null) {
-            movieDto.setDirectors(
-                    movieEntity.getDirectors().stream()
-                            .map(directorTrf::directorEntityToDirectorDto)
-                            .collect(Collectors.toList())
-            );
-        }
-        if (movieEntity.getActors() != null) {
-            movieDto.setActors(
-                    movieEntity.getActors().stream()
-                            .map(actorTrf::actorEntityToActorDto)
-                            .collect(Collectors.toList())
-            );
-        }
+
         return movieDto;
     }
 }

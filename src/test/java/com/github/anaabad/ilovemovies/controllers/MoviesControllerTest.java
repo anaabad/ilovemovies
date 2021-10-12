@@ -110,7 +110,7 @@ public class MoviesControllerTest {
                 .put("directors", new JSONArray())
                 .put("actors", new JSONArray());
 
-        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
+        MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, null, null);
         RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
 
         when(movieRepository.save(movieEntity)).thenReturn(movieEntity);
@@ -136,7 +136,7 @@ public class MoviesControllerTest {
                 .put("directors", new JSONArray());
 
         MovieEntity movieEntity = new MovieEntity("Enredados", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
-        MovieEntity updatedMovieEntity = new MovieEntity("Tangled", LocalDate.parse("2011-02-04"), "Animation", 100, Arrays.asList(), Arrays.asList());
+        MovieEntity updatedMovieEntity = new MovieEntity("Tangled", LocalDate.parse("2011-02-04"), "Animation", 100, null, null);
         RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
 
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movieEntity));

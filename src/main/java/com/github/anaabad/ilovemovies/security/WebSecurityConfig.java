@@ -14,12 +14,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
+import static java.util.Arrays.asList;
+
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true,
         securedEnabled = true,
         jsr250Enabled = true)
 
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    public static final String[] PUBLIC_ENDPOINTS = new String[]{"/login", "/users"};
 
 
     @Autowired
@@ -47,7 +53,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 
         http.csrf().disable()
-                .authorizeRequests().mvcMatchers("/login", "/users").permitAll()
+                .authorizeRequests().mvcMatchers(PUBLIC_ENDPOINTS).permitAll()
                 .anyRequest().authenticated().and()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and().sessionManagement()

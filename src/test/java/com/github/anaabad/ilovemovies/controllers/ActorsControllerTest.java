@@ -8,6 +8,8 @@ import com.github.anaabad.ilovemovies.persistence.repository.*;
 import com.github.anaabad.ilovemovies.security.JwtAuthenticationEntryPoint;
 import com.github.anaabad.ilovemovies.services.AuthenticationService;
 import com.github.anaabad.ilovemovies.services.DirectorService;
+import com.github.anaabad.ilovemovies.services.transformers.ActorTrf;
+import com.github.anaabad.ilovemovies.services.transformers.MovieTrf;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
-@ComponentScan(basePackageClasses = {DirectorService.class, AuthenticationService.class, JwtAuthenticationEntryPoint.class})
+@ComponentScan(basePackageClasses = {DirectorService.class, AuthenticationService.class, JwtAuthenticationEntryPoint.class, MovieTrf.class, ActorTrf.class})
 @ActiveProfiles(profiles = "test")
 
 public class ActorsControllerTest {
@@ -61,6 +63,7 @@ public class ActorsControllerTest {
     public void getActor() throws Exception {
         ActorEntity actor = new ActorEntity();
         actor.setName("Brad Pitt");
+        actor.setMovies(Arrays.asList());
         when(mockActorRepository.findById(1L)).thenReturn(Optional.of(actor));
         when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
 
@@ -152,7 +155,7 @@ public class ActorsControllerTest {
 
     @Test
     public void deleteActor() throws Exception {
-        ActorEntity actorEntity = new ActorEntity("Chris Evans", LocalDate.parse("1981-05-13"), "American", null);
+        ActorEntity actorEntity = new ActorEntity("Chris Evans", LocalDate.parse("1981-05-13"), "American", Arrays.asList());
 
         RoleEntity roleEntity = new RoleEntity("ROLE_ADMIN");
 
@@ -203,5 +206,42 @@ public class ActorsControllerTest {
                         .content(content.toString())
                         .header("Authorization", "Bearer " + VALID_TOKEN))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void teenagers() throws Exception {
+        List<ActorEntity> actors = Arrays.asList(new ActorEntity("Brad Pitt", LocalDate.parse("1963-12-18"), "American", Arrays.asList()),
+                new ActorEntity("Harrison Ford", LocalDate.parse("1942-07-13"), "American", Arrays.asList()),
+                new ActorEntity("Mckenna Grace", LocalDate.parse("2006-04-15"), "American", Arrays.asList()),
+                new ActorEntity("Millie Bobby Brown", LocalDate.parse("2004-06-19"), "British", Arrays.asList()));
+
+        when(mockActorRepository.findAll()).thenReturn(actors);
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
+        mockMvc.perform(get("/actors/teenagers")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*]", hasSize(2)))
+                .andExpect(jsonPath("$[1].name").value("Millie Bobby Brown"));
+    }
+
+    @Test
+    public void moviesByGenre() throws Exception {
+        MovieEntity movieEntity = new MovieEntity("Indiana Jones and the last Crusade", LocalDate.parse("1989-05-24"), "Adventure", 128, Arrays.asList(), Arrays.asList());
+        MovieEntity movieEntity1 = new MovieEntity("Air Force One", LocalDate.parse("1997-08-29"), "Thriller", 124, Arrays.asList(), Arrays.asList());
+        ActorEntity actorEntity = new ActorEntity("Harrison Ford", LocalDate.parse("1942-07-13"), "American", null);
+        actorEntity.setMovies(new ArrayList<>());
+        actorEntity.getMovies().addAll(Arrays.asList(movieEntity, movieEntity1));
+
+        when(mockActorRepository.findById(1L)).thenReturn(Optional.of(actorEntity));
+        when(mockMovieRepository.findByActor(1L)).thenReturn(actorEntity.getMovies());
+        when(userRepository.findByEmail("ana.abadarranz@gmail.com")).thenReturn(Optional.of(new UserEntity("ana.abadarranz@gmail.com", "ilovemovies", Arrays.asList())));
+
+        mockMvc.perform(get("/actors/1/kind/Adventure")
+                        .header("Authorization", "Bearer " + VALID_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*]", hasSize(1)))
+                .andExpect(jsonPath("$[0].name").value("Indiana Jones and the last Crusade"))
+                .andExpect(jsonPath("$[0].genre").value("Adventure"));
     }
 }

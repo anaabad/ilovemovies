@@ -31,14 +31,19 @@ public class MoviesController {
         return movieService.getById(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/byGenre/{genre}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<MovieDto> byGenre(@PathVariable String genre){
+        return movieService.findByGenre(genre);
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MovieDto create(@RequestBody MovieDto movieDto) {
         return movieService.save(movieDto);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MovieDto update(@PathVariable Long id, @RequestBody MovieDto movieDto) throws NotFoundException {
@@ -47,11 +52,12 @@ public class MoviesController {
 
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) throws NotFoundException {
         MovieDto movie = movieService.getById(id);
         movieService.delete(movie);
     }
+
 }

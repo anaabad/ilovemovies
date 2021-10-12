@@ -60,4 +60,5 @@ flyway {
 	url = 'jdbc:postgresql://localhost:5433/ilovemovies'
 	user = 'postgres'
 	password = 'Aria1234'
+	outOfOrder = true
 }

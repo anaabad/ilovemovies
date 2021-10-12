@@ -50,4 +50,12 @@ public class MovieService {
         movieDto.setReleaseDate(movie.getReleaseDate());
         return save(movieDto);
     }
+
+    public List<MovieDto> findByGenre(String genre){
+        return movieRepository.findByGenre(genre).stream().map(movieTrf::movieEntityToMovieDto).collect(Collectors.toList());
+    }
+
+    public List<MovieDto> findByActor(Long actorId){
+        return movieRepository.findByActor(actorId).stream().map(movieTrf::movieEntityToMovieDto).collect(Collectors.toList());
+    }
 }
