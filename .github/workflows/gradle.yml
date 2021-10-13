@@ -45,7 +45,7 @@ jobs:
       with:
         push: true
         context: .
-        tags: docker.pkg.github.com/anicoki/ilovemovies/ilovemovies:${{ steps.tag_version.outputs.new_tag }}
+        tags: docker.pkg.github.com/anaabad/ilovemovies/ilovemovies:${{ steps.tag_version.outputs.new_tag }}
         secrets: |
           GIT_AUTH_TOKEN=${{ github.token }}
       if: ${{ github.event_name != 'pull_request' }}
