@@ -27,3 +27,36 @@ jobs:
       run: ./gradlew build
     - name: Passing tests
       run: gradle test
+    - name: Bump version and push tag
+      id: tag_version
+      uses: mathieudutour/github-tag-action@v5.4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+      if: ${{ github.event_name != 'pull_request' }}
+    - name: Login to Registry
+      uses: docker/login-action@v1
+      with:
+        registry: docker.pkg.github.com
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+      if: ${{ github.event_name != 'pull_request' }}
+    - name: Build docker image
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        context: .
+        tags: docker.pkg.github.com/anicoki/ilovemovies/ilovemovies:${{ steps.tag_version.outputs.new_tag }}
+        secrets: |
+          GIT_AUTH_TOKEN=${{ github.token }}
+      if: ${{ github.event_name != 'pull_request' }}
+    - name: Create a GitHub release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag_version.outputs.new_tag }}
+        release_name: Release ${{ steps.tag_version.outputs.new_tag }}
+        body: ${{ steps.tag_version.outputs.changelog }}
+      if: ${{ github.event_name != 'pull_request' }}
+
+>>>>>>> abcf410 (--wip-- [skip ci])
