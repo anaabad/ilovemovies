@@ -1,0 +1,13 @@
+version: '3'
+services:
+  ilovemovies:
+    build:
+      dockerfile: Dockerfile.dev
+      context: .
+    depends_on:
+      - db
+  db:
+    image: postgres:12-alpine3.14
+    environment:
+      - POSTGRES_USER=  ilovemovies
+      - POSTGRES_PASSWORD= ilovemovies
